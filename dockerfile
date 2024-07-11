@@ -1,4 +1,5 @@
 FROM python:3.7
+LABEL org.opencontainers.image.source="https://github.com/thatyolandawang/myspider"
 WORKDIR /app
 ADD . .
 
