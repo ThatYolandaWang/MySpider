@@ -52,7 +52,11 @@ class OtodomSpider(scrapy.Spider):
             item['price'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/div[@class="css-fdwt8z e1nxvqrh0"]/span')[0].text
             item['name'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/a/p')[0].text
             item['address'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/div[@class="css-12h460e e1nxvqrh1"]/p')[0].text
-            
+            item['room'] = ''
+            item['size'] = ''
+            item['unit'] = ''
+            item['floor'] = ''
+
             count = len(apartment.xpath('.//dd'))
             combine = ''
             if count >=1 :

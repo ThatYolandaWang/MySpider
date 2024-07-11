@@ -1,9 +1,8 @@
-From python:latest
-workdir /app
-add ./myspider /app
-add ./scrapy.cfg /app
-run cd /app
-run pip install -r myspider/requirements.txt
+FROM python:3.7
+WORKDIR /app
+ADD . .
 
+RUN pip install -r ./myspider/requirements.txt
 
-ENTRYPOINT ['python', '/app/myspider/start.py']
+CMD [ "python", "./myspider/start.py"]
+#ENTRYPOINT ['python3', '/app/myspider/start.py']
