@@ -36,7 +36,7 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
-      - name: '05 Build and push image'
+      - name: 'Build Inventory Image'
         run: |
-          docker build . --tag ghcr.io/thatyolandawang/myspider:latest
-          docker push ghcr.io/thatyolandawang/myspider:latest
+          docker build . --tag ghcr.io/thatyolandawang/MySpider:latest
+          docker push ghcr.io/thatyolandawang/MySpider:latest
