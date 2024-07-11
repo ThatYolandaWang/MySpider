@@ -7,9 +7,7 @@ on:
 jobs:
   create-image:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
+    permissions: write-all
     steps:
       - name: '01 - checkout the code'
         uses: actions/checkout@main
