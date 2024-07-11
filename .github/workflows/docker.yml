@@ -33,5 +33,5 @@ jobs:
 
       - name: '05 Build and push image'
         run: |
-          docker build .--tag ghcr.io/thatyolandawang/myspider:latest
+          docker build . --tag ghcr.io/thatyolandawang/myspider:latest
           docker push ghcr.io/thatyolandawang/myspider:latest
