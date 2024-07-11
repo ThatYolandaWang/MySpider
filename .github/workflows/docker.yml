@@ -5,9 +5,16 @@ on:
 
 
 jobs:
+  checkenv:
+    runs-on: ubuntu-latest
+    steps: 
+      - run: echo "user name ${{github.actor}} token ${{secrets.GITHUB_TOKEN}}"
+
   create-image:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: '01 - checkout the code'
         uses: actions/checkout@main
