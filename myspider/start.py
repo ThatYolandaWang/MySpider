@@ -12,4 +12,3 @@ elif(sysstr == "Linux"):
     os.system("scrapy crawl OtodomSpider")
 else:
     print ("Other System tasks")
-

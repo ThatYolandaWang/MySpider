@@ -4,7 +4,8 @@ from requests_file import FileAdapter
 from lxml import etree
 import redis
 import hashlib
-
+import configparser
+import os
 
 redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
 rClient = redis.Redis(connection_pool=redisPool)
@@ -55,12 +56,14 @@ def request():
 if __name__=="__main__":
     print("start")
 
-    data = 'count'
+    path = os.path.dirname(os.path.realpath(__file__))+'\\..\\config.ini'
+    if os.path.isfile(path):
+        print('find path', path)
 
-    md =  hashlib.md5()
-    md.update(str.encode(data))
-    dig = md.digest()
-    strdig = dig.hex()
+    cfg = configparser.ConfigParser()
+    cfg.read(path, encoding='uft-8-sig')
+    print(cfg.sections())
+    dbip = cfg.get('db', 'IP')
     keynum = len(rClient.keys('*'))
     print('total key:', keynum)
     print(rClient.keys('*'))

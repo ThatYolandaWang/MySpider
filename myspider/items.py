@@ -13,3 +13,8 @@ class OtodomItem(scrapy.Item):
     unit = scrapy.Field()
     floor = scrapy.Field()
     address = scrapy.Field()
+    linkage = scrapy.Field()
+
+    #详情
+    id = scrapy.Field()
+    detail = scrapy.Field()
