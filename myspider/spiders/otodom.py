@@ -35,6 +35,10 @@ class OtodomSpider(scrapy.Spider):
         selects = etree.HTML(html)
         apartments = selects.xpath('//section[@class="eeungyz1 css-hqx1d9 e12fn6ie0"]')
 
+        if self.current_page == 1:
+            #查询总页数
+            self.total_page = selects.xpath('//div[@class="css-18budxx e1h66krm0"]/ul/li[last()-1]')[0].text
+
         for apartment in apartments:
             item = OtodomItem()
             combine = ''
@@ -69,7 +73,7 @@ class OtodomSpider(scrapy.Spider):
 #            yield item
 
         
-        self.current_page+=1
+        
         next_url = ""
         if self.current_page > self.total_page:
             if self.current_url_index < len(self.start_urls)-1:
@@ -79,6 +83,7 @@ class OtodomSpider(scrapy.Spider):
                 print('start request in :', self.start_urls[self.current_url_index])
                 next_url = self.start_urls[self.current_url_index]
         else:
+            self.current_page+=1
             next_url = self.start_urls[self.current_url_index]+'/&page='+str(self.current_page)      
         
         if next_url != '':
@@ -116,8 +121,7 @@ class OtodomSpider(scrapy.Spider):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
         }
 
-        item['price_range'] = httpx.post('https://www.otodom.pl/api/query', headers=headers, data=req_data, timeout=10, verify=False)
-
+        item['price_range'] = httpx.post('https://www.otodom.pl/api/query', headers=headers, data=req_data, timeout=10, verify=False).text
         print(item['id'], item['name'])
         yield item
     
