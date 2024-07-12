@@ -3,6 +3,7 @@ from lxml import etree
 from myspider.items import OtodomItem
 from config import config
 import json
+import requests
 
 class OtodomSpider(scrapy.Spider):
     name = "OtodomSpider" #蜘蛛标识
@@ -12,7 +13,8 @@ class OtodomSpider(scrapy.Spider):
         "Accept-Encoding":"gzip, deflate, br",
         "Accept-Language":"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
         "Connection":"keep-alive",
-        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Content-Type":"Content-Type=application/json;charset=utf-8"
     }
     current_page = 1
     total_page = 1
@@ -83,7 +85,7 @@ class OtodomSpider(scrapy.Spider):
         
         self.current_page+=1
         next_url = ""
-        if self.current_page >= 1:#self.total_page:
+        if self.current_page > 0:#self.total_page:
             if self.current_url_index < len(self.start_urls)-1:
                 self.current_page = 1
                 self.total_page = 0
@@ -107,8 +109,14 @@ class OtodomSpider(scrapy.Spider):
         
         data = json.loads(script)
 
-        item['id'] = data['props']['pageProps']['ad']['id']
+        item['id'] = str(data['props']['pageProps']['ad']['id'])
         item['detail'] = script
-        print(item)
+
+        #查询价格
+        req_data = '{\"query\":\"queryAdAvmQuery($input:advertAutomatedValuationModelInput!){\nadAvmData:advertAutomatedValuationModel(input:$input){\n...onAdvertAutomatedValuationModel{\nlowerPredictionPrice\nlowerPredictionPricePerM\npredictionPrice\nupperPredictionPrice\nupperPredictionPricePerM\n__typename\n}\n...onAdvertAutomatedValuationModelError{\nerror\n__typename\n}\n...onErrorInternal{\ncode\nmessage\n__typename\n}\n__typename\n}\n}\",\"operationName\":\"AdAvmQuery\",\"variables\":{\"input\":{\"advertId\":%s,\"currencyTransformation\":\"PLN\"}}}' % item['id']
+
+        item['price_range'] = requests.post('https://www.otodom.pl/api/query', data=req_data).text
+
+        print(item['id'], item['name'])
         yield item
     
