@@ -4,6 +4,7 @@ from myspider.items import OtodomItem
 from config import config
 import json
 import requests
+import httpx
 
 class OtodomSpider(scrapy.Spider):
     name = "OtodomSpider" #蜘蛛标识
@@ -14,7 +15,7 @@ class OtodomSpider(scrapy.Spider):
         "Accept-Language":"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
         "Connection":"keep-alive",
         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        "Content-Type":"Content-Type=application/json;charset=utf-8"
+        "Content-Type":"application/json;charset=utf-8"
     }
     current_page = 1
     total_page = 1
@@ -33,21 +34,6 @@ class OtodomSpider(scrapy.Spider):
         html = response.text
         selects = etree.HTML(html)
         apartments = selects.xpath('//section[@class="eeungyz1 css-hqx1d9 e12fn6ie0"]')
-
-        if self.current_page == 1:
-            page = selects.xpath('//div[@class="css-18budxx e1h66krm0"]')[0]
-            #查询总页数
-            self.total_page = int(page.xpath('.//ul/li[last()-1]')[0].text)
-            print("totel page:", str(self.total_page))
-            item = OtodomItem()
-            item['price'] = 'price'
-            item['name'] = 'name'
-            item['room'] = 'room'
-            item['size'] = 'size'
-            item['floor'] = 'floor'
-            item['unit'] = 'unit'
-            item['address'] = 'address'
-            yield item
 
         for apartment in apartments:
             item = OtodomItem()
@@ -85,7 +71,7 @@ class OtodomSpider(scrapy.Spider):
         
         self.current_page+=1
         next_url = ""
-        if self.current_page > 0:#self.total_page:
+        if self.current_page > self.total_page:
             if self.current_url_index < len(self.start_urls)-1:
                 self.current_page = 1
                 self.total_page = 0
@@ -113,9 +99,24 @@ class OtodomSpider(scrapy.Spider):
         item['detail'] = script
 
         #查询价格
-        req_data = '{\"query\":\"queryAdAvmQuery($input:advertAutomatedValuationModelInput!){\nadAvmData:advertAutomatedValuationModel(input:$input){\n...onAdvertAutomatedValuationModel{\nlowerPredictionPrice\nlowerPredictionPricePerM\npredictionPrice\nupperPredictionPrice\nupperPredictionPricePerM\n__typename\n}\n...onAdvertAutomatedValuationModelError{\nerror\n__typename\n}\n...onErrorInternal{\ncode\nmessage\n__typename\n}\n__typename\n}\n}\",\"operationName\":\"AdAvmQuery\",\"variables\":{\"input\":{\"advertId\":%s,\"currencyTransformation\":\"PLN\"}}}' % item['id']
+        # req_data = {
+        #     "query": "query AdAvmQuery($input: advertAutomatedValuationModelInput!) {\n  adAvmData: advertAutomatedValuationModel(input: $input) {\n    ... on AdvertAutomatedValuationModel {\n      lowerPredictionPrice\n      lowerPredictionPricePerM\n      predictionPrice\n      upperPredictionPrice\n      upperPredictionPricePerM\n      __typename\n    }\n    ... on AdvertAutomatedValuationModelError {\n      error\n      __typename\n    }\n    ... on ErrorInternal {\n      code\n      message\n      __typename\n    }\n    __typename\n  }\n}",
+        #     "operationName": "AdAvmQuery",
+        #     "variables": {
+        #         "input": {
+        #             "advertId": item['id'],
+        #             "currencyTransformation": "PLN"
+        #         }
+        #     }
+        # }
+        req_data = '{\"query\":\"query AdAvmQuery($input: advertAutomatedValuationModelInput!) {\\n  adAvmData: advertAutomatedValuationModel(input: $input) {\\n    ... on AdvertAutomatedValuationModel {\\n      lowerPredictionPrice\\n      lowerPredictionPricePerM\\n      predictionPrice\\n      upperPredictionPrice\\n      upperPredictionPricePerM\\n      __typename\\n    }\\n    ... on AdvertAutomatedValuationModelError {\\n      error\\n      __typename\\n    }\\n    ... on ErrorInternal {\\n      code\\n      message\\n      __typename\\n    }\\n    __typename\\n  }\\n}\",\"operationName\":\"AdAvmQuery\",\"variables\":{\"input\":{\"advertId\":%s,\"currencyTransformation\":\"PLN\"}}}' % item['id']
 
-        item['price_range'] = requests.post('https://www.otodom.pl/api/query', data=req_data).text
+        headers = {
+            "Content-Type":"application/json;charset=utf-8",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
+        }
+
+        item['price_range'] = httpx.post('https://www.otodom.pl/api/query', headers=headers, data=req_data, timeout=10, verify=False)
 
         print(item['id'], item['name'])
         yield item

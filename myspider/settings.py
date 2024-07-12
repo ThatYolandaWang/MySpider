@@ -39,10 +39,10 @@ HTTPERROR_ALLOWED_CODES = [302]
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-DEFAULT_REQUEST_HEADERS = {
-   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-   'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-}
+# DEFAULT_REQUEST_HEADERS = {
+#    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#    'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+# }
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
