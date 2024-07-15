@@ -33,11 +33,6 @@ class CSVWrite:
         self.writer.writeheader()
 
     def write(self, line):
-        # headers = ['id', 'name', 'price', 'room', 'size', 'unit', 'floor', 'address', 'linkage', 'detail', 'predict_price']
-        # f = open(os.path.abspath(os.path.dirname(__file__)) + '\\..\\test.csv', 'w', encoding='utf-8', newline='')
-        # write = csv.DictWriter(f, headers)
-        # write.writeheader()
-        # write.writerow(line)
         self.writer.writerow(line)
     
     def close(self):
