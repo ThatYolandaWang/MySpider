@@ -24,7 +24,6 @@ class MyspiderPipeline:
     def open_spider(self, spider):
         print('open spider')
         self.datawrite.open()
-        self.filename = os.path.abspath(os.path.dirname(__file__)) + '\\..\\result.csv'
 
     def process_item(self, item, spider):
         print('get item', item['id'])

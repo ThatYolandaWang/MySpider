@@ -37,7 +37,7 @@ class OtodomSpider(scrapy.Spider):
 
         if self.current_page == 1:
             #查询总页数
-            self.total_page = int(page.xpath('.//ul/li[last()-1]')[0].text)
+            self.total_page = int(selects.xpath('//div[@class="css-18budxx e1h66krm0"]/ul/li[last()-1]')[0].text)
             print("totel page:", str(self.total_page))
             # item = OtodomItem()
             # item['price'] = 'price'
@@ -65,8 +65,6 @@ class OtodomSpider(scrapy.Spider):
             item['unit'] = ''
             item['floor'] = ''
             item['id'] = ''
-            item['detail'] = ''
-            item['predict_price'] = ''
 
             count = len(apartment.xpath('.//dd'))
 
@@ -114,7 +112,7 @@ class OtodomSpider(scrapy.Spider):
         data = json.loads(script)
 
         item['id'] = str(data['props']['pageProps']['ad']['id'])
-        item['detail'] = script
+        # item['detail'] = script
         headers = {
             "Content-Type":"application/json",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
@@ -123,11 +121,54 @@ class OtodomSpider(scrapy.Spider):
         request_data = '{\"query\":\"query AdAvmQuery($input: advertAutomatedValuationModelInput!) {\\n  adAvmData: advertAutomatedValuationModel(input: $input) {\\n    ... on AdvertAutomatedValuationModel {\\n      lowerPredictionPrice\\n      lowerPredictionPricePerM\\n      predictionPrice\\n      upperPredictionPrice\\n      upperPredictionPricePerM\\n      __typename\\n    }\\n    ... on AdvertAutomatedValuationModelError {\\n      error\\n      __typename\\n    }\\n    ... on ErrorInternal {\\n      code\\n      message\\n      __typename\\n    }\\n    __typename\\n  }\\n}\",\"operationName\":\"AdAvmQuery\",\"variables\":{\"input\":{\"advertId\":%s,\"currencyTransformation\":\"PLN\"}}}' % item['id']
         
         resp = httpx.post('https://www.otodom.pl/api/query', data = request_data, headers=headers, timeout=10, verify=False)
-
-        if resp.status_code == 200:
-            item['predict_price'] = resp.text
-        else:
-            item['predict_price'] = ''
+        
+        item = self.parse_script(data,resp.text, item)
+        # if resp.status_code == 200:
+        #     item['predict_price'] = resp.text
+        # else:
+        #     item['predict_price'] = ''
         
         yield item
     
+    def parse_script(self, detail, price_data, item):
+        if detail['props']['pageProps']['ad']['createdAt']== True: 
+            item['createdAt']= detail['props']['pageProps']['ad']['createdAt']
+        
+        if detail.__contains__('modifiedAt') == True:
+            item['modifiedAt']=detail['props']['pageProps']['ad']['modifiedAt']
+        
+        if detail.__contains__('Build_year') == True:
+            item['Build_year']=detail['props']['pageProps']['ad']['target']['Build_year']
+
+        if detail.__contains__('Building_floors_num') == True:
+            item['Building_floors_num']=detail['props']['pageProps']['ad']['target']['Building_floors_num']
+        
+        if detail.__contains__('Building_ownership') == True:
+            item['Building_ownership']=detail['props']['pageProps']['ad']['target']['Building_ownership']
+
+        if detail.__contains__('Building_type') == True:
+            item['Building_type']=detail['props']['pageProps']['ad']['target']['Building_type']
+        if detail.__contains__('Construction_status') == True:
+            item['Construction_status']=detail['props']['pageProps']['ad']['target']['Construction_status']
+        if detail.__contains__('Energy_certificate') == True:
+            item['Energy_certificate']=detail['props']['pageProps']['ad']['target']['Energy_certificate']
+        if detail.__contains__('Rent') == True:        
+            item['Rent']=detail['props']['pageProps']['ad']['target']['Rent']
+        if detail.__contains__('hidePrice') == True:        
+            item['hidePrice']=detail['props']['pageProps']['ad']['target']['hidePrice']
+        if detail.__contains__('lat') == True:        
+            item['lat']=detail['props']['pageProps']['adTrackingData']['lat']
+        if detail.__contains__('long') == True:        
+            item['long']=detail['props']['pageProps']['adTrackingData']['long']
+
+        if detail.__contains__('lowerPredictionPrice') == True:
+            item['lowerPredictionPrice']=price_data['data']['adAvmData']['lowerPredictionPrice']
+        if detail.__contains__('lowerPredictionPricePerM') == True:        
+            item['lowerPredictionPricePerM']=price_data['data']['adAvmData']['lowerPredictionPricePerM']
+        if detail.__contains__('predictionPrice') == True:        
+            item['predictionPrice']=price_data['data']['adAvmData']['predictionPrice']
+        if detail.__contains__('upperPredictionPrice') == True:        
+            item['upperPredictionPrice']=price_data['data']['adAvmData']['upperPredictionPrice']
+        if detail.__contains__('upperPredictionPricePerM') == True:        
+            item['upperPredictionPricePerM']=price_data['data']['adAvmData']['upperPredictionPricePerM']
+        return item

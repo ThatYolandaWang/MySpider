@@ -15,7 +15,26 @@ class OtodomItem(scrapy.Item):
     address = scrapy.Field()
     linkage = scrapy.Field()
 
-    #详情
     id = scrapy.Field()
-    detail = scrapy.Field()
-    predict_price = scrapy.Field()
+    # detail = scrapy.Field()
+    # predict_price = scrapy.Field()
+
+    #详情
+    createdAt = scrapy.Field()
+    modifiedAt = scrapy.Field()
+    Build_year = scrapy.Field()
+    Building_floors_num = scrapy.Field()
+    Building_ownership = scrapy.Field()
+    Building_type = scrapy.Field()
+    Construction_status = scrapy.Field()
+    Energy_certificate = scrapy.Field()
+    Rent = scrapy.Field()
+    hidePrice = scrapy.Field()
+    lat = scrapy.Field()
+    long = scrapy.Field()
+
+    lowerPredictionPrice = scrapy.Field()
+    lowerPredictionPricePerM = scrapy.Field()
+    predictionPrice = scrapy.Field()
+    upperPredictionPrice = scrapy.Field()
+    upperPredictionPricePerM = scrapy.Field()
