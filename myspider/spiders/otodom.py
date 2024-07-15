@@ -131,7 +131,7 @@ class OtodomSpider(scrapy.Spider):
         yield item
     
     def parse_script(self, detail, price_data, item):
-        if detail['props']['pageProps']['ad']['createdAt']== True: 
+        if 'createdAt' in detail: 
             item['createdAt']= detail['props']['pageProps']['ad']['createdAt']
         
         if detail.__contains__('modifiedAt') == True:
