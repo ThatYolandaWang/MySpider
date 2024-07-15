@@ -18,3 +18,4 @@ class OtodomItem(scrapy.Item):
     #详情
     id = scrapy.Field()
     detail = scrapy.Field()
+    predict_price = scrapy.Field()

@@ -3,6 +3,8 @@ from lxml import etree
 from myspider.items import OtodomItem
 from config import config
 import json
+import requests
+import httpx
 
 class OtodomSpider(scrapy.Spider):
     name = "OtodomSpider" #蜘蛛标识
@@ -37,15 +39,15 @@ class OtodomSpider(scrapy.Spider):
             #查询总页数
             self.total_page = int(page.xpath('.//ul/li[last()-1]')[0].text)
             print("totel page:", str(self.total_page))
-            item = OtodomItem()
-            item['price'] = 'price'
-            item['name'] = 'name'
-            item['room'] = 'room'
-            item['size'] = 'size'
-            item['floor'] = 'floor'
-            item['unit'] = 'unit'
-            item['address'] = 'address'
-            yield item
+            # item = OtodomItem()
+            # item['price'] = 'price'
+            # item['name'] = 'name'
+            # item['room'] = 'room'
+            # item['size'] = 'size'
+            # item['floor'] = 'floor'
+            # item['unit'] = 'unit'
+            # item['address'] = 'address'
+            # yield item
 
         for apartment in apartments:
             item = OtodomItem()
@@ -62,6 +64,9 @@ class OtodomSpider(scrapy.Spider):
             item['size'] = ''
             item['unit'] = ''
             item['floor'] = ''
+            item['id'] = ''
+            item['detail'] = ''
+            item['predict_price'] = ''
 
             count = len(apartment.xpath('.//dd'))
 
@@ -81,9 +86,9 @@ class OtodomSpider(scrapy.Spider):
 #            yield item
 
         
-        self.current_page+=1
+        
         next_url = ""
-        if self.current_page >= 1:#self.total_page:
+        if self.current_page >= self.total_page:
             if self.current_url_index < len(self.start_urls)-1:
                 self.current_page = 1
                 self.total_page = 0
@@ -91,7 +96,8 @@ class OtodomSpider(scrapy.Spider):
                 print('start request in :', self.start_urls[self.current_url_index])
                 next_url = self.start_urls[self.current_url_index]
         else:
-            next_url = self.start_urls[self.current_url_index]+'/&page='+str(self.current_page)      
+            next_url = self.start_urls[self.current_url_index]+'/&page='+str(self.current_page)
+            self.current_page+=1
         
         if next_url != '':
             yield scrapy.Request(next_url, callback=self.parse, headers=self.headers)
@@ -107,8 +113,21 @@ class OtodomSpider(scrapy.Spider):
         
         data = json.loads(script)
 
-        item['id'] = data['props']['pageProps']['ad']['id']
+        item['id'] = str(data['props']['pageProps']['ad']['id'])
         item['detail'] = script
-        print(item)
+        headers = {
+            "Content-Type":"application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
+        }
+
+        request_data = '{\"query\":\"query AdAvmQuery($input: advertAutomatedValuationModelInput!) {\\n  adAvmData: advertAutomatedValuationModel(input: $input) {\\n    ... on AdvertAutomatedValuationModel {\\n      lowerPredictionPrice\\n      lowerPredictionPricePerM\\n      predictionPrice\\n      upperPredictionPrice\\n      upperPredictionPricePerM\\n      __typename\\n    }\\n    ... on AdvertAutomatedValuationModelError {\\n      error\\n      __typename\\n    }\\n    ... on ErrorInternal {\\n      code\\n      message\\n      __typename\\n    }\\n    __typename\\n  }\\n}\",\"operationName\":\"AdAvmQuery\",\"variables\":{\"input\":{\"advertId\":%s,\"currencyTransformation\":\"PLN\"}}}' % item['id']
+        
+        resp = httpx.post('https://www.otodom.pl/api/query', data = request_data, headers=headers, timeout=10, verify=False)
+
+        if resp.status_code == 200:
+            item['predict_price'] = resp.text
+        else:
+            item['predict_price'] = ''
+        
         yield item
     

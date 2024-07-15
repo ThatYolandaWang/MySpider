@@ -4,7 +4,7 @@ from requests_file import FileAdapter
 from lxml import etree
 import redis
 import hashlib
-import configparser
+import csv
 import os
 
 redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
@@ -52,18 +52,29 @@ def request():
         writedb(md.digest(), data)
         print(md.digest(), data)
 
+def writedict(dictitem):
+    headers = ['id', 'name', 'price', 'room', 'size', 'unit', 'floor', 'address', 'linkage', 'detail', 'predict_price']
+    f = open(os.path.abspath(os.path.dirname(__file__)) + '\\..\\test.csv', 'w', encoding='utf-8', newline='')
+    write = csv.DictWriter(f, headers)
+    write.writeheader()
+    write.writerow(dictitem)
 
 if __name__=="__main__":
     print("start")
 
-    path = os.path.dirname(os.path.realpath(__file__))+'\\..\\config.ini'
-    if os.path.isfile(path):
-        print('find path', path)
 
-    cfg = configparser.ConfigParser()
-    cfg.read(path, encoding='uft-8-sig')
-    print(cfg.sections())
-    dbip = cfg.get('db', 'IP')
+    dit = {'address': 'Wyględów, Mokotów, Warszawa, mazowieckie',
+        'detail': '',
+        'floor': '4 piętro',
+        'linkage': 'https://www.otodom.pl/pl/oferta/2-pokoje-50-45-m2-ul-tolkiena-1300000-zl-ID4qGbf',
+        'predict_price': '',
+        'price': '1\xa0160\xa0000\xa0zł',
+        'room': '2 pokoje',
+        'size': '50.45 m²',
+        'unit': '22\xa0993\xa0zł/m²'}
+
+    writedict(dit)
+
     keynum = len(rClient.keys('*'))
     print('total key:', keynum)
     print(rClient.keys('*'))
