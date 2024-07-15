@@ -131,44 +131,44 @@ class OtodomSpider(scrapy.Spider):
         yield item
     
     def parse_script(self, detail, price_data, item):
-        if 'createdAt' in detail: 
+        if 'createdAt' in detail['props']['pageProps']['ad']: 
             item['createdAt']= detail['props']['pageProps']['ad']['createdAt']
         
-        if detail.__contains__('modifiedAt') == True:
+        if 'modifiedAt' in detail['props']['pageProps']['ad']:
             item['modifiedAt']=detail['props']['pageProps']['ad']['modifiedAt']
         
-        if detail.__contains__('Build_year') == True:
+        if 'Build_year' in detail['props']['pageProps']['ad']['target']:
             item['Build_year']=detail['props']['pageProps']['ad']['target']['Build_year']
 
-        if detail.__contains__('Building_floors_num') == True:
+        if 'Building_floors_num' in detail['props']['pageProps']['ad']['target']:
             item['Building_floors_num']=detail['props']['pageProps']['ad']['target']['Building_floors_num']
         
-        if detail.__contains__('Building_ownership') == True:
+        if 'Building_ownership' in detail['props']['pageProps']['ad']['target']:
             item['Building_ownership']=detail['props']['pageProps']['ad']['target']['Building_ownership']
 
-        if detail.__contains__('Building_type') == True:
+        if 'Building_type' in detail['props']['pageProps']['ad']['target']:
             item['Building_type']=detail['props']['pageProps']['ad']['target']['Building_type']
-        if detail.__contains__('Construction_status') == True:
+        if 'Construction_status' in detail['props']['pageProps']['ad']['target']:
             item['Construction_status']=detail['props']['pageProps']['ad']['target']['Construction_status']
-        if detail.__contains__('Energy_certificate') == True:
+        if 'Energy_certificate' in detail['props']['pageProps']['ad']['target']:
             item['Energy_certificate']=detail['props']['pageProps']['ad']['target']['Energy_certificate']
-        if detail.__contains__('Rent') == True:        
+        if 'Rent' in detail['props']['pageProps']['ad']['target']:
             item['Rent']=detail['props']['pageProps']['ad']['target']['Rent']
-        if detail.__contains__('hidePrice') == True:        
+        if 'hidePrice' in detail['props']['pageProps']['ad']['target']:       
             item['hidePrice']=detail['props']['pageProps']['ad']['target']['hidePrice']
-        if detail.__contains__('lat') == True:        
+        if 'lat' in detail['props']['pageProps']['adTrackingData']:      
             item['lat']=detail['props']['pageProps']['adTrackingData']['lat']
-        if detail.__contains__('long') == True:        
+        if 'long' in detail['props']['pageProps']['adTrackingData']:        
             item['long']=detail['props']['pageProps']['adTrackingData']['long']
 
-        if detail.__contains__('lowerPredictionPrice') == True:
+        if 'lowerPredictionPrice' in price_data['data']['adAvmData']:  
             item['lowerPredictionPrice']=price_data['data']['adAvmData']['lowerPredictionPrice']
-        if detail.__contains__('lowerPredictionPricePerM') == True:        
+        if 'lowerPredictionPricePerM' in price_data['data']['adAvmData']:       
             item['lowerPredictionPricePerM']=price_data['data']['adAvmData']['lowerPredictionPricePerM']
-        if detail.__contains__('predictionPrice') == True:        
+        if 'predictionPrice' in price_data['data']['adAvmData']:    
             item['predictionPrice']=price_data['data']['adAvmData']['predictionPrice']
-        if detail.__contains__('upperPredictionPrice') == True:        
+        if 'upperPredictionPrice' in price_data['data']['adAvmData']:        
             item['upperPredictionPrice']=price_data['data']['adAvmData']['upperPredictionPrice']
-        if detail.__contains__('upperPredictionPricePerM') == True:        
+        if 'upperPredictionPricePerM' in price_data['data']['adAvmData']:       
             item['upperPredictionPricePerM']=price_data['data']['adAvmData']['upperPredictionPricePerM']
         return item
