@@ -1,7 +1,7 @@
 import redis
 import os
 import hashlib
-import csv,json
+import csv
 
 
 class DBWrite:
