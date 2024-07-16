@@ -1,3 +1,4 @@
+import sys
 import platform
 from scrapy import cmdline
 import os

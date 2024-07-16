@@ -1,7 +1,7 @@
 import scrapy
 from lxml import etree
 from myspider.items import OtodomItem
-from config import config
+from myspider.config import config
 import json
 import requests
 import httpx
@@ -86,7 +86,11 @@ class OtodomSpider(scrapy.Spider):
         
         
         next_url = ""
-        if self.current_page >= self.total_page:
+        # 如果启用debug，则仅查询一页
+        total_page = self.total_page
+        if self.cfg.get_test_status:
+            total_page = 1
+        if self.current_page >= total_page:
             if self.current_url_index < len(self.start_urls)-1:
                 self.current_page = 1
                 self.total_page = 0
@@ -122,7 +126,7 @@ class OtodomSpider(scrapy.Spider):
         
         resp = httpx.post('https://www.otodom.pl/api/query', data = request_data, headers=headers, timeout=10, verify=False)
         
-        item = self.parse_script(data,resp.text, item)
+        item = self.parse_script(data,json.loads(resp.text), item)
         # if resp.status_code == 200:
         #     item['predict_price'] = resp.text
         # else:
@@ -138,20 +142,20 @@ class OtodomSpider(scrapy.Spider):
             item['modifiedAt']=detail['props']['pageProps']['ad']['modifiedAt']
         
         if 'Build_year' in detail['props']['pageProps']['ad']['target']:
-            item['Build_year']=detail['props']['pageProps']['ad']['target']['Build_year']
+            item['Build_year']=int(detail['props']['pageProps']['ad']['target']['Build_year'])
 
         if 'Building_floors_num' in detail['props']['pageProps']['ad']['target']:
-            item['Building_floors_num']=detail['props']['pageProps']['ad']['target']['Building_floors_num']
+            item['Building_floors_num']=int(detail['props']['pageProps']['ad']['target']['Building_floors_num'])
         
         if 'Building_ownership' in detail['props']['pageProps']['ad']['target']:
-            item['Building_ownership']=detail['props']['pageProps']['ad']['target']['Building_ownership']
+            item['Building_ownership']=','.join(detail['props']['pageProps']['ad']['target']['Building_ownership'])
 
         if 'Building_type' in detail['props']['pageProps']['ad']['target']:
-            item['Building_type']=detail['props']['pageProps']['ad']['target']['Building_type']
+            item['Building_type']=','.join(detail['props']['pageProps']['ad']['target']['Building_type'])
         if 'Construction_status' in detail['props']['pageProps']['ad']['target']:
-            item['Construction_status']=detail['props']['pageProps']['ad']['target']['Construction_status']
+            item['Construction_status']=','.join(detail['props']['pageProps']['ad']['target']['Construction_status'])
         if 'Energy_certificate' in detail['props']['pageProps']['ad']['target']:
-            item['Energy_certificate']=detail['props']['pageProps']['ad']['target']['Energy_certificate']
+            item['Energy_certificate']=','.join(detail['props']['pageProps']['ad']['target']['Energy_certificate'])
         if 'Rent' in detail['props']['pageProps']['ad']['target']:
             item['Rent']=detail['props']['pageProps']['ad']['target']['Rent']
         if 'hidePrice' in detail['props']['pageProps']['ad']['target']:       
@@ -161,8 +165,9 @@ class OtodomSpider(scrapy.Spider):
         if 'long' in detail['props']['pageProps']['adTrackingData']:        
             item['long']=detail['props']['pageProps']['adTrackingData']['long']
 
+
         if 'lowerPredictionPrice' in price_data['data']['adAvmData']:  
-            item['lowerPredictionPrice']=price_data['data']['adAvmData']['lowerPredictionPrice']
+            item['lowerPredictionPrice'] = price_data['data']['adAvmData']['lowerPredictionPrice']
         if 'lowerPredictionPricePerM' in price_data['data']['adAvmData']:       
             item['lowerPredictionPricePerM']=price_data['data']['adAvmData']['lowerPredictionPricePerM']
         if 'predictionPrice' in price_data['data']['adAvmData']:    

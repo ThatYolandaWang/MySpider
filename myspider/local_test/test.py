@@ -7,10 +7,17 @@ import hashlib
 import csv
 import os
 
-redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
-rClient = redis.Redis(connection_pool=redisPool)
+
+def readredis():
+    redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
+    rClient = redis.Redis(connection_pool=redisPool)
+    keynum = len(rClient.keys('*'))
+    print('total key:', keynum)
+    print(rClient.keys('*'))
 
 def writedb(key, value):
+    redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
+    rClient = redis.Redis(connection_pool=redisPool)
     print('write in db')
     rClient.set(key, value)
 
@@ -52,35 +59,32 @@ def request():
         writedb(md.digest(), data)
         print(md.digest(), data)
 
-def writedict(dictitem):
-    headers = ['id', 'name', 'price', 'room', 'size', 'unit', 'floor', 'address', 'linkage', 'detail', 'predict_price']
-    f = open(os.path.abspath(os.path.dirname(__file__)) + '\\..\\test.csv', 'w', encoding='utf-8', newline='')
-    write = csv.DictWriter(f, headers)
-    write.writeheader()
-    write.writerow(dictitem)
+
+def parse_json():
+    item={}
+    price_data = {
+        "data": {
+            "adAvmData": {
+                "lowerPredictionPrice": 1.2773376e+06,
+                "lowerPredictionPricePerM": 20275.2,
+                "predictionPrice": 1.419264e+06,
+                "upperPredictionPrice": 1.5611904e+06,
+                "upperPredictionPricePerM": 24780.8,
+                "__typename": "AdvertAutomatedValuationModel",
+                "__typename": "AdvertAutomatedValuationModel"
+            }
+        }
+    }
+
+    if 'lowerPredictionPrice' in price_data['data']['adAvmData']:  
+        print(price_data['data']['adAvmData']['lowerPredictionPrice'])
+        item['lowerPredictionPrice']=price_data['data']['adAvmData']['lowerPredictionPrice']
+
+    print(item.keys())
 
 if __name__=="__main__":
     print("start")
 
+    parse_json()
 
-    dit = {'address': 'Wyględów, Mokotów, Warszawa, mazowieckie',
-        'detail': '',
-        'floor': '4 piętro',
-        'linkage': 'https://www.otodom.pl/pl/oferta/2-pokoje-50-45-m2-ul-tolkiena-1300000-zl-ID4qGbf',
-        'predict_price': '',
-        'price': '1\xa0160\xa0000\xa0zł',
-        'room': '2 pokoje',
-        'size': '50.45 m²',
-        'unit': '22\xa0993\xa0zł/m²'}
-
-    writedict(dit)
-
-    keynum = len(rClient.keys('*'))
-    print('total key:', keynum)
-    print(rClient.keys('*'))
-    
-#    print('check keys ', rClient.get('027cf515d9bc45d9b1502b2282e4c768'))
-    # print('set name ', rClient.set('name', 'Zhou'))
-    # print('check name value ',rClient.get('name'))
-#    request()
 

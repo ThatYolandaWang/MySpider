@@ -26,3 +26,6 @@ class config:
             url_list.insert(i, url)
             i+=1
         return url_list
+    
+    def get_test_status(self):
+        return (self.cfg.getint('debug', 'test')==1)

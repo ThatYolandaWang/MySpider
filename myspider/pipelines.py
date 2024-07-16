@@ -6,20 +6,17 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-import codecs
 import json
 import requests
 import os
-from datawrite import DBWrite,CSVWrite
-import hashlib
-from config import config
-import csv
+from myspider.datawrite import DBWrite,CSVWrite
+from myspider.config import config
 
 class MyspiderPipeline:
     def __init__(self):
         cfg = config()
         #self.datawrite = DBWrite(cfg.get_db_ip(), cfg.get_db_port(), cfg.get_db_num())
-        self.datawrite = CSVWrite('result1.csv')
+        self.datawrite = CSVWrite('result.csv')
 
     def open_spider(self, spider):
         print('open spider')
