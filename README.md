@@ -1,4 +1,4 @@
-# Web Scrapy in Python
+# Web Scrapy in Python and deploy in AWS Lambda
 
 A scrapy project to collect apartment information from [otodom](https://www.otodom.pl) website in Warsaw - Motokow and Wola areas.
 
