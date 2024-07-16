@@ -1,4 +1,4 @@
-# MySpider
+# Web Scrapy in Python
 
 A scrapy project to collect apartment information from [otodom](https://www.otodom.pl) website in Warsaw - Motokow and Wola areas.
 
