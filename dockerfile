@@ -1,3 +1,5 @@
+
+# python镜像：
 # FROM python:3.7
 # LABEL org.opencontainers.image.source="https://github.com/thatyolandawang/myspider"
 # WORKDIR /app
@@ -8,6 +10,8 @@
 # CMD [ "python", "./myspider/start.py"]
 #ENTRYPOINT ['python3', '/app/myspider/start.py']
 
+
+# 创建lambda镜像
 FROM public.ecr.aws/lambda/python:3.10
 
 # Copy function code

@@ -1,7 +1,7 @@
 import redis
 import os
 import csv
-
+import platform
 
 class DBWrite:
     def __init__(self, ip, port, dbnum):
@@ -23,7 +23,12 @@ class DBWrite:
 
 class CSVWrite:
     def __init__(self, filename):
-        self.filename = os.path.abspath(os.path.dirname(__file__)) + '\\..\\' + filename
+        self.filename = ""
+        sysstr = platform.system()
+        if(sysstr =="Windows"):
+            self.filename = os.path.abspath(os.path.dirname(__file__)) + '\\' + filename
+        else:
+            self.filename = os.path.dirname(os.path.realpath(__file__))+'/'+ filename
 
     def open(self):
         self.f = open(self.filename, 'w', encoding='utf-8', newline='')
