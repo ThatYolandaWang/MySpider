@@ -1,9 +1,16 @@
 import configparser,json, os
-
+import platform
 
 class config:
     def __init__(self):
-        cfg_path = os.path.dirname(os.path.realpath(__file__))+'\\config.ini'
+        cfg_path = ""
+        sysstr = platform.system()
+        if(sysstr =="Windows"):
+            cfg_path = os.path.dirname(os.path.realpath(__file__))+'\\config.ini'
+        else:
+            cfg_path = os.path.dirname(os.path.realpath(__file__))+'/config.ini'
+
+        print('config.ini path:', cfg_path)
         self.cfg = configparser.ConfigParser()
         self.cfg.read(cfg_path, encoding='utf-8-sig')
 
