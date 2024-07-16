@@ -1,6 +1,6 @@
 # MySpider
 
-A scarpy project to collect apartment information from [otodom](https://www.otodom.pl) website in Warsaw - Motokow and Wola areas.
+A scrapy project to collect apartment information from [otodom](https://www.otodom.pl) website in Warsaw - Motokow and Wola areas.
 
 The information will be saved in ./result.csv for furture analyze.
 
@@ -112,4 +112,3 @@ docker push 058264127206.dkr.ecr.eu-west-1.amazonaws.com/myspider:latest
 
 3. You can check logs from AWS CloudWatch
 
-### CI
