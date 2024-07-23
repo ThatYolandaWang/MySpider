@@ -29,9 +29,13 @@ class config:
         url_list = []
         i = 0
         for site in site_list:
-            url = base_url +site+"?viewType=listing"
+            url = base_url +"/"+site+"?viewType=listing"
             url_list.insert(i, url)
             i+=1
+
+        if len(site_list)==0:
+            url_list.insert(0, base_url)
+
         return url_list
     
     def get_test_status(self):

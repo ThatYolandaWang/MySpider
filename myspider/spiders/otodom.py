@@ -5,6 +5,7 @@ from myspider.config import config
 import json
 import requests
 import httpx
+import re
 
 class OtodomSpider(scrapy.Spider):
     name = "OtodomSpider" #蜘蛛标识
@@ -50,9 +51,30 @@ class OtodomSpider(scrapy.Spider):
             # yield item
 
         for apartment in apartments:
+
             item = OtodomItem()
             combine = ''
-            item['price'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/div[@class="css-fdwt8z e1nxvqrh0"]/span')[0].text
+            price_text_org = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/div[@class="css-fdwt8z e1nxvqrh0"]/span')[0].text
+            #解析价格数据
+            pln_unit = 'zł'
+            euro_unit = '€'
+            exchage_rate = 4.29
+            price_value = 0 #初始化，如果没价格就算0
+            #单位
+            if str.find(price_text_org, pln_unit) > 0 or str.find(price_text_org, euro_unit) > 0:
+                price_num_list = re.findall(r"\d+\,?\d*", price_text_org)
+                price_text = ''.join(price_num_list)
+                #数字中的,转.
+                if str.find(price_text, ',')>0:
+                    price_text = price_text.replace(',', '.')
+                price_value = float(price_text)
+                
+                if str.find(price_text_org, euro_unit) > 0:
+                    price_value = price_value * exchage_rate
+
+            item['price'] = int(price_value)
+
+            #item['price']
             item['name'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/a/p')[0].text
             detail_url = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/a/@href')[0]
             if str.find(detail_url, 'http'):
@@ -60,25 +82,7 @@ class OtodomSpider(scrapy.Spider):
 
             item['linkage'] = detail_url
             item['address'] = apartment.xpath('.//div[@class="css-13gthep eeungyz2"]/div[@class="css-12h460e e1nxvqrh1"]/p')[0].text
-            item['room'] = ''
-            item['size'] = ''
-            item['unit'] = ''
-            item['floor'] = ''
-            item['id'] = ''
-
-            count = len(apartment.xpath('.//dd'))
-
-            if count >=1 :
-                item['room'] = combine.join(apartment.xpath('.//dd[1]')[0].text)
-            if count >=2:
-                item['size'] = combine.join(apartment.xpath('.//dd[2]/text()'))
-            if count >=3:
-                item['unit'] = combine.join(apartment.xpath('.//dd[3]/text()'))
-            if count >=4:
-                item['floor'] = combine.join(apartment.xpath('.//dd[4]/text()'))
-            
-            
-
+ 
             yield scrapy.Request(detail_url, callback=self.parse_detail, headers=self.headers, meta={'item':item})
             
 #            yield item
@@ -88,7 +92,7 @@ class OtodomSpider(scrapy.Spider):
         next_url = ""
         # 如果启用debug，则仅查询一页
         total_page = self.total_page
-        if self.cfg.get_test_status:
+        if self.cfg.get_test_status == True:
             total_page = 1
         if self.current_page >= total_page:
             if self.current_url_index < len(self.start_urls)-1:
@@ -98,7 +102,7 @@ class OtodomSpider(scrapy.Spider):
                 print('start request in :', self.start_urls[self.current_url_index])
                 next_url = self.start_urls[self.current_url_index]
         else:
-            next_url = self.start_urls[self.current_url_index]+'/&page='+str(self.current_page)
+            next_url = self.start_urls[self.current_url_index]+'?page='+str(self.current_page)
             self.current_page+=1
         
         if next_url != '':
@@ -135,6 +139,8 @@ class OtodomSpider(scrapy.Spider):
         yield item
     
     def parse_script(self, detail, price_data, item):
+
+
         if 'createdAt' in detail['props']['pageProps']['ad']: 
             item['createdAt']= detail['props']['pageProps']['ad']['createdAt']
         
@@ -165,6 +171,26 @@ class OtodomSpider(scrapy.Spider):
         if 'long' in detail['props']['pageProps']['adTrackingData']:        
             item['long']=detail['props']['pageProps']['adTrackingData']['long']
 
+        if 'Area' in detail['props']['pageProps']['ad']['target']:
+            item['size']=detail['props']['pageProps']['ad']['target']['Area']
+        if 'City' in detail['props']['pageProps']['ad']['target']:
+            item['city']=detail['props']['pageProps']['ad']['target']['City']
+        if 'Rooms_num' in detail['props']['pageProps']['ad']['target']:
+            item['room']=detail['props']['pageProps']['ad']['target']['Rooms_num'][0]
+        if 'Price_per_m' in detail['props']['pageProps']['ad']['target']:
+            item['unit']=detail['props']['pageProps']['ad']['target']['Price_per_m']
+        
+        if 'Floor_no' in detail['props']['pageProps']['ad']['target']:
+            floor_text = detail['props']['pageProps']['ad']['target']['Floor_no'][0]
+            if str.find(floor_text, 'ground_floor')>0:
+                item['floor']=0
+            else:
+                ls_floor = re.findall(r"\d+", floor_text)
+                if len(ls_floor)>0:
+                    item['floor']=ls_floor[0]
+
+        if 'district' in detail['props']['pageProps']['ad']['location']['address']:
+            item['district'] = detail['props']['pageProps']['ad']['location']['address']['district']['name']
 
         if 'lowerPredictionPrice' in price_data['data']['adAvmData']:  
             item['lowerPredictionPrice'] = price_data['data']['adAvmData']['lowerPredictionPrice']

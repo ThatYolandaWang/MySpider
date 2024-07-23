@@ -6,7 +6,8 @@ import redis
 import hashlib
 import csv
 import os
-
+import re
+import json
 
 def readredis():
     redisPool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0, decode_responses=True)
@@ -82,9 +83,35 @@ def parse_json():
 
     print(item.keys())
 
+def parse_num():
+    price_text_org = "1 009 949,88 €"
+    #检查带zł
+    pln_unit = 'zł'
+    euro_unit = '€'
+    exchage_rate = 4.29
+    #单位
+    if str.find(price_text_org, pln_unit) > 0 or str.find(price_text_org, euro_unit) > 0:
+        price_num_list = re.findall(r"\d+\,?\d*", price_text_org)
+        price_text = ''.join(price_num_list)
+        #数字中的,转.
+        if str.find(price_text, ',')>0:
+            price_text = price_text.replace(',', '.')
+        price_value = float(price_text)
+        
+        if str.find(price_text_org, euro_unit) > 0:
+            price_value = price_value * exchage_rate
+        
+    print(price_value)
+
 if __name__=="__main__":
     print("start")
 
-    parse_json()
+#    parse_json()
 
+    data = '{\"label\": \"rent\",\"values\": [\"750 zł\"],\"unit\": \"\",\"__typename\": \"AdditionalInfo\"}'
 
+    data_json = json.loads(data)
+
+    print(data_json['values'][0])
+
+    

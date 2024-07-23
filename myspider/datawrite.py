@@ -32,7 +32,7 @@ class CSVWrite:
 
     def open(self):
         self.f = open(self.filename, 'w', encoding='utf-8', newline='')
-        headers = ['id', 'name', 'price', 'room', 'size', 'unit', 'floor', 'address', 'linkage', 'createdAt', 'modifiedAt', 'Build_year', 'Building_floors_num', 'Building_ownership', 'Building_type', 'Construction_status', 'Energy_certificate', 'Rent', 'hidePrice', 'lat', 'long', 'lowerPredictionPrice', 'lowerPredictionPricePerM', 'predictionPrice', 'upperPredictionPrice', 'upperPredictionPricePerM']
+        headers = ['id', 'name', 'price', 'room', 'size', 'unit', 'floor', 'city', 'address', 'district', 'linkage', 'createdAt', 'modifiedAt', 'Build_year', 'Building_floors_num', 'Building_ownership', 'Building_type', 'Construction_status', 'Energy_certificate', 'Rent', 'hidePrice', 'lat', 'long', 'lowerPredictionPrice', 'lowerPredictionPricePerM', 'predictionPrice', 'upperPredictionPrice', 'upperPredictionPricePerM']
         self.writer = csv.DictWriter(self.f, headers)
         self.writer.writeheader()
 

@@ -8,10 +8,7 @@ import scrapy
 class OtodomItem(scrapy.Item):
     name = scrapy.Field()
     price = scrapy.Field()
-    room = scrapy.Field()
-    size = scrapy.Field()
-    unit = scrapy.Field()
-    floor = scrapy.Field()
+
     address = scrapy.Field()
     linkage = scrapy.Field()
 
@@ -26,12 +23,18 @@ class OtodomItem(scrapy.Item):
     Building_floors_num = scrapy.Field()
     Building_ownership = scrapy.Field()
     Building_type = scrapy.Field()
+    room = scrapy.Field()
+    size = scrapy.Field()
+    unit = scrapy.Field()
+    floor = scrapy.Field()
+    city = scrapy.Field()
     Construction_status = scrapy.Field()
     Energy_certificate = scrapy.Field()
     Rent = scrapy.Field()
     hidePrice = scrapy.Field()
     lat = scrapy.Field()
     long = scrapy.Field()
+    district = scrapy.Field()
 
     lowerPredictionPrice = scrapy.Field()
     lowerPredictionPricePerM = scrapy.Field()
